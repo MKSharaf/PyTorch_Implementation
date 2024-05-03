@@ -1,4 +1,5 @@
 import torch
+import math
 from torch.nn.functional import relu
 
 def crop_tensor(tensor_cont, tensor_exp):
@@ -18,7 +19,7 @@ def crop_tensor(tensor_cont, tensor_exp):
   of the image and end 40 points before the end of the image in both dimensions. This ensures that we lose 80 points in width, and 80 points in height
   """
 
-class UNet:
+class UNet (torch.nn.Module):
   def __init__(self, n):
     super().__init__()
     
@@ -74,55 +75,55 @@ class UNet:
     self.fl = torch.nn.Conv2d(64, n, 1)
 
 
-    def forward(self, x):
-      # Encoder
+  def forward(self, x):
+    # Encoder
 
-      # Output of first set
-      actc1_1 = relu(self.cl1_1(x))
-      actc1_2 = relu(self.cl1_2(actc1_1))
-      cont1 = self.pool1(actc1_2)
+    # Output of first set
+    actc1_1 = relu(self.cl1_1(x))
+    actc1_2 = relu(self.cl1_2(actc1_1))
+    cont1 = self.pool1(actc1_2)
 
-      # Output of second set
-      actc2_1 = relu(self.cl2_1(cont1))
-      actc2_2 = relu(self.cl2_2(actc2_1))
-      cont2 = self.pool2(actc2_2)
+    # Output of second set
+    actc2_1 = relu(self.cl2_1(cont1))
+    actc2_2 = relu(self.cl2_2(actc2_1))
+    cont2 = self.pool2(actc2_2)
 
-      # Output of third set
-      actc3_1 = relu(self.cl3_1(cont2))
-      actc3_2 = relu(self.cl3_2(actc3_1))
-      cont3 = self.pool3(actc3_2)
+    # Output of third set
+    actc3_1 = relu(self.cl3_1(cont2))
+    actc3_2 = relu(self.cl3_2(actc3_1))
+    cont3 = self.pool3(actc3_2)
 
-      # Output of fourth set
-      actc4_1 = relu(self.cl4_1(cont3))
-      actc4_2 = relu(self.cl4_2(actc4_1))
-      cont4 = self.pool4(actc4_2)
+    # Output of fourth set
+    actc4_1 = relu(self.cl4_1(cont3))
+    actc4_2 = relu(self.cl4_2(actc4_1))
+    cont4 = self.pool4(actc4_2)
 
-      # Output of fourth set
-      actc5_1 = relu(self.cl5_1(cont4))
-      actc5_2 = relu(self.cl5_2(actc5_1))
-      exp1 = self.upcl1(actc5_2)
+    # Output of fourth set
+    actc5_1 = relu(self.cl5_1(cont4))
+    actc5_2 = relu(self.cl5_2(actc5_1))
+    exp1 = self.upcl1(actc5_2)
 
-      # Decoder
+    # Decoder
 
-      # Output of first set
-      acte1_1 = relu(self.cl6_1(torch.cat((exp1, crop_tensor(actc4_2,exp1)), 1)))
-      acte1_2 = relu(self.cl6_2(acte1_1))
-      exp2 = self.upcl2(acte1_2)
+    # Output of first set
+    acte1_1 = relu(self.cl6_1(torch.cat((exp1, crop_tensor(actc4_2, exp1)), 1)))
+    acte1_2 = relu(self.cl6_2(acte1_1))
+    exp2 = self.upcl2(acte1_2)
 
-      # Output of second set
-      acte2_1 = relu(self.cl7_1(torch.cat((exp2, crop_tensor(actc3_2,exp2)), 1)))
-      acte2_2 = relu(self.cl7_2(acte2_1))
-      exp3 = self.upcl3(acte2_2)
+    # Output of second set
+    acte2_1 = relu(self.cl7_1(torch.cat((exp2, crop_tensor(actc3_2, exp2)), 1)))
+    acte2_2 = relu(self.cl7_2(acte2_1))
+    exp3 = self.upcl3(acte2_2)
 
-      # Output of third set
-      acte3_1 = relu(self.cl8_1(torch.cat((exp3, crop_tensor(actc2_2,exp3)), 1)))
-      acte3_2 = relu(self.cl8_2(acte3_1))
-      exp4 = self.upcl4(acte3_2)
+    # Output of third set
+    acte3_1 = relu(self.cl8_1(torch.cat((exp3, crop_tensor(actc2_2, exp3)), 1)))
+    acte3_2 = relu(self.cl8_2(acte3_1))
+    exp4 = self.upcl4(acte3_2)
 
-      # Output of fourth set
-      acte4_1 = relu(self.cl9_1(torch.cat((exp4, crop_tensor(actc1_2,exp4)), 1)))
-      acte4_2 = relu(self.cl9_2(acte4_1))
-      
-      Output = self.fl(acte4_2)
+    # Output of fourth set
+    acte4_1 = relu(self.cl9_1(torch.cat((exp4, crop_tensor(actc1_2,exp4)), 1)))
+    acte4_2 = relu(self.cl9_2(acte4_1))
+    
+    Output = self.fl(acte4_2)
 
-      return Output
+    return Output
