@@ -1,0 +1,8 @@
+[args]
+Image_Directory = Dataset/png_images/IMAGES
+Mask_Directory = Dataset/png_masks/MASKS
+Batch_Size = 8
+Classes = 59
+Learning_Rate = 0.001
+Epochs = 5
+Train_Split = 0.8
