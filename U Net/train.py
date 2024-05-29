@@ -25,11 +25,11 @@ def train(
     data = dataset.Data(img_dir = imgDir, mask_dir = maskDir)
 
     train_length=int(split* len(data))
-    test_length=len(data)-train_length
+    val_length=len(data)-train_length
 
-    train_dataset, test_dataset = torch.utils.data.random_split(
+    train_dataset, val_dataset = torch.utils.data.random_split(
         dataset = data,
-        lengths = (train_length,test_length),
+        lengths = (train_length,val_length),
         generator = torch.Generator(device = device)
         )
     train_dataset = dataset.transformData(train_dataset, transform = v2.Compose([
@@ -40,7 +40,7 @@ def train(
         v2.ElasticTransform(alpha = 50.0, sigma = 10),
         v2.Resize((512,512))
         ]))
-    test_dataset = dataset.transformData(test_dataset, transform = v2.Compose([
+    val_dataset = dataset.transformData(val_dataset, transform = v2.Compose([
         v2.ToTensor(),
         v2.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         v2.Resize((512,512))
@@ -52,7 +52,7 @@ def train(
         shuffle=True, 
         generator=torch.Generator(device=device))
     validation_loader = torch.utils.data.DataLoader(
-        test_dataset, 
+        val_dataset, 
         batch_size=batch, 
         shuffle=False, 
         generator=torch.Generator(device=device))
